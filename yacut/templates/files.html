@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Загрузка файлов — YaCut{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Загрузка файлов</h1>
+<p class="text-center my-4">
+  Загрузите файлы — мы создадим для них короткие ссылки
+</p>
+
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.files.label(class="form-label") }}
+        {{ form.files(class="form-control", multiple=True) }}
+        {% if form.files.errors %}
+          {% for error in form.files.errors %}
+            <div class="text-danger">{{ error }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+  </div>
+</div>
+
+{% if results %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-8">
+    <h5>Результаты загрузки:</h5>
+    <ul class="list-group">
+      {% for result in results %}
+        <li class="list-group-item">
+          <a href="{{ result.link }}" target="_blank">{{ result.name }}</a>
+          → <a href="{{ result.link }}">{{ result.link }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
