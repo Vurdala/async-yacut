@@ -31,7 +31,7 @@ async def upload_file_to_disk(file, short_id, session):
     async with session.put(upload_url, data=form_data) as resp:
         if resp.status not in (201, 202):
             return None
-        
+
     async with session.get(
         DOWNLOAD_URL,
         params={"path": path_on_disk}
