@@ -8,7 +8,6 @@ from yacut import db
 from .error_handlers import (
     InvalidAPIUsage,
     ERROR_INVALID_SHORT,
-    ERROR_NOT_FOUND,
     ERROR_SHORT_EXISTS,
 )
 from settings import Config

@@ -1,6 +1,7 @@
 import os
 import string
 
+
 class Config(object):
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///db.sqlite3")
     SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
@@ -16,6 +17,7 @@ class Config(object):
     RESERVED_ENDPOINTS = {'files'}
     YANDEX_DISK_API_BASE = 'https://cloud-api.yandex.net/v1'
     YANDEX_DISK_UPLOAD_URL = YANDEX_DISK_API_BASE + '/disk/resources/upload'
-    YANDEX_DISK_DOWNLOAD_URL = YANDEX_DISK_API_BASE + '/disk/resources/download'
+    YANDEX = '/disk/resources/download'
+    YANDEX_DISK_DOWNLOAD_URL = YANDEX_DISK_API_BASE + YANDEX
     YANDEX_DISK_PATH_PREFIX = '/uploads/'
     BASE_URL = 'http://localhost'

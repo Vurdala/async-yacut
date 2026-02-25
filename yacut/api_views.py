@@ -12,12 +12,16 @@ from .error_handlers import (
 @app.route("/api/id/", methods=["POST"])
 def create_short_link():
     if not request.is_json:
-        raise InvalidAPIUsage(ERROR_NO_JSON, status_code=HTTPStatus.BAD_REQUEST)
+        raise InvalidAPIUsage(
+            ERROR_NO_JSON, status_code=HTTPStatus.BAD_REQUEST
+        )
 
     data = request.get_json(silent=True)
 
     if data is None:
-        raise InvalidAPIUsage(ERROR_NO_BODY, status_code=HTTPStatus.BAD_REQUEST)
+        raise InvalidAPIUsage(
+            ERROR_NO_BODY, status_code=HTTPStatus.BAD_REQUEST
+        )
 
     if "url" not in data:
         raise InvalidAPIUsage(ERROR_NO_URL, status_code=HTTPStatus.BAD_REQUEST)
