@@ -15,21 +15,17 @@
       <div class="mb-3">
         {{ form.original_link.label(class="form-label") }}
         {{ form.original_link(class="form-control form-control-lg", placeholder="Длинная ссылка") }}
-        {% if form.original_link.errors %}
-          {% for error in form.original_link.errors %}
-            <div class="text-danger">{{ error }}</div>
-          {% endfor %}
-        {% endif %}
+        {% for error in form.original_link.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
 
       <div class="mb-3">
         {{ form.custom_id.label(class="form-label") }}
         {{ form.custom_id(class="form-control form-control-lg", placeholder="Ваш вариант короткой ссылки") }}
-        {% if form.custom_id.errors %}
-          {% for error in form.custom_id.errors %}
-            <div class="text-danger">{{ error }}</div>
-          {% endfor %}
-        {% endif %}
+        {% for error in form.custom_id.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
 
       {{ form.submit(class="btn btn-primary") }}
@@ -38,13 +34,13 @@
 </div>
 
 {% if short_link %}
-<div class="row justify-content-center mt-4">
-  <div class="col-md-8 col-lg-6">
-    <p class="text-center">
-      <strong>Ваша короткая ссылка:</strong>
-      <a href="{{ short_link }}" target="_blank">{{ short_link }}</a>
-    </p>
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+      <p class="text-center">
+        <strong>Ваша короткая ссылка:</strong>
+        <a href="{{ short_link }}" target="_blank">{{ short_link }}</a>
+      </p>
+    </div>
   </div>
-</div>
 {% endif %}
 {% endblock %}

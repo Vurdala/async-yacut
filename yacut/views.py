@@ -1,90 +1,63 @@
-from . import db
+from flask import flash, redirect, render_template, request, url_for
+from werkzeug.datastructures import FileStorage
 
 import asyncio
-from flask import flash, render_template, request, redirect
-import aiohttp
 
 from . import app
+from .forms import FileForm, URLForm
 from .models import URLMap
-from .forms import URLForm, FileForm
-from .utils import get_unique_short_id
 from .yandexdisk import upload_file_to_disk
-
-RESERVED_ENDPOINTS = {'files', 'index', 'static'}
+from .error_handlers import InvalidAPIUsage
 
 
 @app.route("/", methods=["GET", "POST"])
-def index_view():
+def index():
     form = URLForm()
-    short_link = None
-
     if form.validate_on_submit():
         original = form.original_link.data
-        custom_id = form.custom_id.data or get_unique_short_id()
+        custom_id = form.custom_id.data or None
 
-        if custom_id in {'files'}:
-            flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('index.html', form=form)
+        try:
+            url_map = URLMap.create(original=original, short=custom_id)
+            short_link = url_for(
+                "redirect_view", short=url_map.short, _external=True
+            )
+            return render_template("index.html", form=form, short_link=short_link)
+        except InvalidAPIUsage as e:
+            flash(e.message)
 
-        if URLMap.query.filter_by(short=custom_id).first():
-            flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('index.html', form=form)
-
-        url_map = URLMap(original=original, short=custom_id)
-        db.session.add(url_map)
-        db.session.commit()
-
-        short_link = f'{request.host_url}{custom_id}'
-        flash(f'Ваша короткая ссылка: {short_link}')
-
-    return render_template('index.html', form=form, short_link=short_link)
+    return render_template("index.html", form=form)
 
 
-@app.route('/<short_id>')
-def redirect_view(short_id):
-    url_map = URLMap.query.filter_by(short=short_id).first_or_404()
+@app.route("/<short>")
+def redirect_view(short):
+    url_map = URLMap.get_or_404(short)
     return redirect(url_map.original)
 
 
 @app.route("/files", methods=["GET", "POST"])
 def files_view():
     form = FileForm()
-    results = []
-
     if form.validate_on_submit():
-        uploaded_files = form.files.data
-        successful_uploads = []
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        async def run_uploads():
-            async with aiohttp.ClientSession(
-                headers={"Authorization": app.config["DISK_TOKEN"]}
-            ) as session:
-                for file in uploaded_files:
-                    if file and file.filename:
-                        short_id = get_unique_short_id()
-                        url_map = URLMap(
-                            original=f"https://disk.yandex.ru/d/{short_id}",
-                            short=short_id,
-                        )
-                        db.session.add(url_map)
-                        db.session.commit()
-
-                        _ = await upload_file_to_disk(
-                            file, short_id, session
-                        )
-                        link = f"{request.host_url}{short_id}"
-                        successful_uploads.append(
-                            {"name": file.filename, "link": link}
-                        )
-                return successful_uploads
-
         try:
-            uploads = loop.run_until_complete(run_uploads())
-            results.extend(uploads)
-        except Exception as e:
-            flash(f"Ошибка: {e}")
+            files = []
+            file_objects = form.files.data or request.files.getlist("files")
 
-    return render_template("files.html", form=form, results=results)
+            for f in file_objects:
+                if isinstance(f, FileStorage):
+                    files.append((f, f.filename))
+                else:
+                    stream, name = f
+                    fs = FileStorage(stream=stream, filename=name)
+                    files.append((fs, name))
+
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            results = loop.run_until_complete(
+                upload_file_to_disk(files, app.config["DISK_TOKEN"])
+            )
+            return render_template("files.html", form=form, results=results)
+        except Exception as e:
+            flash(f"Ошибка загрузки: {e}")
+    return render_template("files.html", form=form)
+

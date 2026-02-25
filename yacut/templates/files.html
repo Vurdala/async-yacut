@@ -15,11 +15,9 @@
       <div class="mb-3">
         {{ form.files.label(class="form-label") }}
         {{ form.files(class="form-control", multiple=True) }}
-        {% if form.files.errors %}
-          {% for error in form.files.errors %}
-            <div class="text-danger">{{ error }}</div>
-          {% endfor %}
-        {% endif %}
+        {% for error in form.files.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       {{ form.submit(class="btn btn-primary") }}
     </form>
@@ -27,18 +25,18 @@
 </div>
 
 {% if results %}
-<div class="row justify-content-center mt-5">
-  <div class="col-md-8">
-    <h5>Результаты загрузки:</h5>
-    <ul class="list-group">
-      {% for result in results %}
-        <li class="list-group-item">
-          <a href="{{ result.link }}" target="_blank">{{ result.name }}</a>
-          → <a href="{{ result.link }}">{{ result.link }}</a>
-        </li>
-      {% endfor %}
-    </ul>
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+      <h5>Результаты загрузки:</h5>
+      <ul class="list-group">
+        {% for result in results %}
+          <li class="list-group-item">
+            <a href="{{ result.link }}" target="_blank">{{ result.name }}</a>
+            → <a href="{{ result.link }}">{{ result.link }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
-</div>
 {% endif %}
 {% endblock %}
