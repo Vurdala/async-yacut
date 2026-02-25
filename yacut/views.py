@@ -62,4 +62,3 @@ def files_view():
         except Exception as e:
             flash(f"Ошибка загрузки: {e}")
     return render_template("files.html", form=form)
-
