@@ -46,17 +46,17 @@ async def upload_file_to_disk(files, token):
                     text = await resp.text()
                     raise RuntimeError(f"Ошибка загрузки файла: {text}")
 
-            # 3. Получаем публичную ссылку для скачивания файла
             async with session.get(
                 Config.YANDEX_DISK_DOWNLOAD_URL,
                 params={"path": path_on_disk},
             ) as resp:
                 if resp.status != HTTPStatus.OK:
                     text = await resp.text()
-                    raise RuntimeError(f"Ошибка получения публичной ссылки: {text}")
+                    raise RuntimeError(
+                        f"Ошибка получения публичной ссылки: {text}"
+                    )
                 download_link = (await resp.json()).get("href")
 
-            # Создаём короткую ссылку на публичный URL
             url_map = URLMap.create(original=download_link)
             short_link = f"{Config.BASE_URL}/{url_map.short}"
 

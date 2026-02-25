@@ -22,7 +22,9 @@ def index():
             short_link = url_for(
                 "redirect_view", short=url_map.short, _external=True
             )
-            return render_template("index.html", form=form, short_link=short_link)
+            return render_template(
+                "index.html", form=form, short_link=short_link
+            )
         except InvalidAPIUsage as e:
             flash(e.message)
 
