@@ -1,41 +1,40 @@
 from http import HTTPStatus
-from flask import request, jsonify, url_for
+
+from flask import request, jsonify
 
 from . import app
-from .models import URLMap
 from .error_handlers import (
     InvalidAPIUsage, ERROR_NO_BODY,
     ERROR_NO_JSON, ERROR_NO_URL
 )
+from .models import URLMap
 
 
 @app.route("/api/id/", methods=["POST"])
 def create_short_link():
     if not request.is_json:
-        raise InvalidAPIUsage(
-            ERROR_NO_JSON, status_code=HTTPStatus.BAD_REQUEST
-        )
+        raise InvalidAPIUsage(ERROR_NO_JSON)
 
     data = request.get_json(silent=True)
 
     if data is None:
-        raise InvalidAPIUsage(
-            ERROR_NO_BODY, status_code=HTTPStatus.BAD_REQUEST
-        )
+        raise InvalidAPIUsage(ERROR_NO_BODY)
 
     if "url" not in data:
-        raise InvalidAPIUsage(ERROR_NO_URL, status_code=HTTPStatus.BAD_REQUEST)
+        raise InvalidAPIUsage(ERROR_NO_URL)
+    try:
+        url_map = URLMap.create(
+            original=data["url"],
+            short=data.get("custom_id")
+        )
+    except ValueError as e:
+        raise InvalidAPIUsage(str(e))
 
-    custom_id = data.get("custom_id")
-
-    url_map = URLMap.create(original=data["url"], short=custom_id)
     return (
         jsonify(
             {
-                "url": url_map.original,
-                "short_link": url_for(
-                    "redirect_view", short=url_map.short, _external=True
-                ),
+                "url": data["url"],
+                "short_link": url_map.get_short_link()
             }
         ),
         HTTPStatus.CREATED,
@@ -44,5 +43,4 @@ def create_short_link():
 
 @app.route("/api/id/<path:short>/", methods=["GET"])
 def get_opinion(short):
-    url_map = URLMap.get_or_404(short)
-    return jsonify({"url": url_map.original}), HTTPStatus.OK
+    return jsonify({"url": URLMap.get_or_404(short).original}), HTTPStatus.OK

@@ -1,22 +1,21 @@
 from datetime import datetime
-import re
 import random
 
-from flask import abort
+from flask import abort, url_for
 
 from yacut import db
-from .error_handlers import (
-    InvalidAPIUsage,
-    ERROR_INVALID_SHORT,
-    ERROR_SHORT_EXISTS,
+from .error_handlers import ERROR_INVALID_SHORT, ERROR_SHORT_EXISTS
+from settings import (
+    Config, MAX_LENGTH,
+    MAX_SHORT_ID_LENGTH, MAX_GENERATE_ATTEMPTS,
+    SHORT_ID_LENGTH
 )
-from settings import Config
 
 
 class URLMap(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    original = db.Column(db.String(Config.MAX_LENGTH), nullable=False)
-    short = db.Column(db.String(Config.MAX_LENGTH), nullable=False)
+    original = db.Column(db.String(MAX_LENGTH), nullable=False)
+    short = db.Column(db.String(MAX_LENGTH), nullable=False)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     @staticmethod
@@ -31,17 +30,17 @@ class URLMap(db.Model):
         if not short:
             short = cls._generate_unique_short()
 
-        if short in Config.RESERVED_SHORTS:
-            raise InvalidAPIUsage(ERROR_SHORT_EXISTS)
+        if short in {'admin', 'files', 'api', 'static', 'favicon.ico'}:
+            raise ValueError(ERROR_SHORT_EXISTS)
 
-        if len(short) > Config.MAX_SHORT_ID_LENGTH:
-            raise InvalidAPIUsage(ERROR_INVALID_SHORT)
+        if len(short) > MAX_SHORT_ID_LENGTH:
+            raise ValueError(ERROR_INVALID_SHORT)
 
-        if not re.fullmatch(r"^[a-zA-Z0-9]+$", short):
-            raise InvalidAPIUsage(ERROR_INVALID_SHORT)
+        if not Config.SHORT_ID_PATTERN.fullmatch(short):
+            raise ValueError(ERROR_INVALID_SHORT)
 
         if cls.query.filter_by(short=short).first():
-            raise InvalidAPIUsage(ERROR_SHORT_EXISTS)
+            raise ValueError(ERROR_SHORT_EXISTS)
 
         url_map = cls(original=original, short=short)
         db.session.add(url_map)
@@ -50,9 +49,9 @@ class URLMap(db.Model):
 
     @classmethod
     def _generate_unique_short(cls):
-        for _ in range(Config.MAX_GENERATE_ATTEMPTS):
+        for _ in range(MAX_GENERATE_ATTEMPTS):
             short = "".join(
-                random.choices(Config.SHORT_ID_CHARS, k=Config.SHORT_ID_LENGTH)
+                random.choices(Config.SHORT_ID_CHARS, k=SHORT_ID_LENGTH)
             )
             if not cls.query.filter_by(short=short).first():
                 return short
@@ -61,6 +60,13 @@ class URLMap(db.Model):
     @staticmethod
     def _is_valid_chars(s):
         return all(c in Config.SHORT_ID_CHARS for c in s)
+
+    def get_short_link(self):
+        return url_for(
+            Config.SHORT_LINK_VIEW_NAME,
+            short=self.short,
+            _external=True,
+        )
 
     def to_dict(self):
         return {

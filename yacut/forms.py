@@ -5,32 +5,37 @@ from wtforms.validators import (
     DataRequired, Length, Optional, Regexp
 )
 
-from settings import Config
+from settings import Config, MAX_URL_LENGTH, MAX_SHORT_ID_LENGTH
 
 ORIGINAL_LINK_LABEL = 'Введите ссылку'
-CUSTOM_ID_LABEL = 'Введите короткий идентификатор'
+SHORT_LABEL = 'Введите короткий идентификатор'
 SUBMIT_BUTTON_LABEL = 'Сократить ссылку'
 
 FILE_FIELD_LABEL = 'Файл для загрузки'
 UPLOAD_BUTTON_LABEL = 'Загрузить'
+
+DATA_REQUIRED_MESSAGE = 'Обязательное поле'
+FILE_REQUIRED_MESSAGE = 'Требуется выбрать хотя бы один файл'
+SHORT_ID_ERROR_MESSAGE = 'Можно использовать только буквы и цифры'
+FILE_ALLOWED_MESSAGE = 'Разрешены только изображения'
 
 
 class URLForm(FlaskForm):
     original_link = URLField(
         ORIGINAL_LINK_LABEL,
         validators=[
-            DataRequired(message='Обязательное поле'),
-            Length(max=Config.MAX_URL_LENGTH)
+            DataRequired(message=DATA_REQUIRED_MESSAGE),
+            Length(max=MAX_URL_LENGTH)
         ],
     )
     custom_id = StringField(
-        CUSTOM_ID_LABEL,
+        SHORT_LABEL,
         validators=[
             Optional(),
-            Length(max=Config.MAX_SHORT_ID_LENGTH),
+            Length(max=MAX_SHORT_ID_LENGTH),
             Regexp(
-                r'^[a-zA-Z0-9]*$',
-                message='Можно использовать только буквы и цифры'
+                Config.SHORT_ID_PATTERN,
+                message=SHORT_ID_ERROR_MESSAGE
             )
         ]
     )
@@ -41,10 +46,10 @@ class FileForm(FlaskForm):
     files = MultipleFileField(
         FILE_FIELD_LABEL,
         validators=[
-            DataRequired(message='Требуется выбрать хотя бы один файл'),
+            DataRequired(message=FILE_REQUIRED_MESSAGE),
             FileAllowed(
                 Config.ALLOWED_EXTENSIONS,
-                message='Разрешены только изображения'
+                message=FILE_ALLOWED_MESSAGE
             )
         ],
     )

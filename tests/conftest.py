@@ -11,7 +11,7 @@ from PIL import Image
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-sys.path.append(str(BASE_DIR))
+sys.path = [str(BASE_DIR)] + [p for p in sys.path if p != str(BASE_DIR)]
 
 _user_environment = os.environ.copy()
 _tmp_db_uri = 'sqlite:///:memory:'
