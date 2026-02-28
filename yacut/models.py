@@ -33,7 +33,11 @@ class URLMap(db.Model):
         return URLMap.query.filter_by(short=short).first_or_404()
 
     @staticmethod
-    def create(original, short=None, validate: bool = True, commit: bool = True):
+    def create(
+        original, short=None,
+        validate: bool = True,
+        commit: bool = True
+    ):
         if not short:
             short = URLMap._generate_unique_short()
 
@@ -70,7 +74,8 @@ class URLMap(db.Model):
             short = "".join(
                 random.choices(Config.SHORT_CHARS, k=SHORT_LENGTH)
             )
-            if short not in RESERVED_SHORTS and not URLMap.query.filter_by(short=short).first():
+            if short not in RESERVED_SHORTS and not URLMap.query.filter_by(
+                 short=short).first():
                 return short
         raise RuntimeError(UNIQUE_SHORT_GENERATION_ERROR)
 
