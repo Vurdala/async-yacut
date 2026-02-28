@@ -5,12 +5,7 @@ from io import BytesIO
 import aiohttp
 from werkzeug.datastructures import FileStorage
 
-from settings import (
-    Config, YANDEX_DISK_UPLOAD_URL,
-    YANDEX_DISK_DOWNLOAD_URL
-)
-
-from .models import URLMap
+from settings import Config
 
 
 ERROR_GET_UPLOAD_LINK = 'Ошибка получения ссылки для загрузки'
@@ -19,35 +14,42 @@ ERROR_GET_DOWNLOAD_LINK = 'Ошибка получения публичной с
 
 
 async def process_uploaded_files(file_data):
-    def _normalize_item(item):
-        if isinstance(item, FileStorage):
-            return item, item.filename
-        if isinstance(item, tuple) and len(item) == 2:
-            stream, name = item
-            if isinstance(stream, BytesIO):
-                fs = FileStorage(stream=stream, filename=name)
-            else:
-                fs = FileStorage(stream=BytesIO(stream.read()), filename=name)
-            return fs, name
-        raise ValueError(f'Неподдерживаемый формат файла: {type(item)}')
-
-    files = [_normalize_item(item) for item in file_data]
-
     async with aiohttp.ClientSession(
         headers=Config.YANDEX_DISK_HEADERS
     ) as session:
         results = []
-        for storage, display_name in files:
+        for item in file_data:
+            if isinstance(item, FileStorage):
+                storage, display_name = item, item.filename
+            elif isinstance(item, tuple) and len(item) == 2:
+                stream, name = item
+                storage = (
+                    FileStorage(stream=stream, filename=name)
+                    if isinstance(stream, BytesIO)
+                    else FileStorage(
+                        stream=BytesIO(stream.read()), filename=name
+                    )
+                )
+                display_name = name
+            else:
+                raise ValueError(
+                    'Неподдерживаемый формат файла: {0}'.format(type(item))
+                )
+
             filename = storage.filename or display_name
-            path_on_disk = f"{Config.YANDEX_DISK_PATH_PREFIX}{filename}"
+            path_on_disk = '{0}{1}'.format(
+                Config.YANDEX_DISK_PATH_PREFIX, filename
+            )
 
             async with session.get(
-                YANDEX_DISK_UPLOAD_URL,
+                Config.YANDEX_DISK_UPLOAD_URL,
                 params={'path': path_on_disk, 'overwrite': 'true'},
             ) as resp:
                 if resp.status != HTTPStatus.OK:
                     raise RuntimeError(
-                        f'{ERROR_GET_UPLOAD_LINK}: {await resp.text()}'
+                        '{0}: {1}'.format(
+                            ERROR_GET_UPLOAD_LINK, await resp.text()
+                        )
                     )
                 upload_url = (await resp.json())['href']
 
@@ -58,30 +60,28 @@ async def process_uploaded_files(file_data):
                     HTTPStatus.CREATED, HTTPStatus.OK
                 ):
                     raise RuntimeError(
-                        f'{ERROR_UPLOAD_FILE}: {await upload_resp.text()}'
+                        '{0}: {1}'.format(
+                            ERROR_UPLOAD_FILE, await upload_resp.text()
+                        )
                     )
 
             async with session.get(
-                YANDEX_DISK_DOWNLOAD_URL,
+                Config.YANDEX_DISK_DOWNLOAD_URL,
                 params={'path': path_on_disk},
             ) as resp:
                 if resp.status != HTTPStatus.OK:
                     raise RuntimeError(
-                        f'{ERROR_GET_DOWNLOAD_LINK}: {await resp.text()}'
+                        '{0}: {1}'.format(
+                            ERROR_GET_DOWNLOAD_LINK, await resp.text()
+                        )
                     )
                 download_link = (await resp.json()).get('href')
 
-            url_map = URLMap.create(original=download_link)
-            short_link = f'http://localhost/{url_map.short}'
-
             results = results + [
-                {
-                    'name': display_name,
-                    'link': short_link,
-                }
+                {'name': display_name, 'url': download_link}
             ]
 
-    return [item for item in results]
+    return results
 
 
 def sync_process_uploaded_files(file_data):

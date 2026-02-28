@@ -5,7 +5,7 @@ from wtforms.validators import (
     DataRequired, Length, Optional, Regexp
 )
 
-from settings import Config, MAX_URL_LENGTH, MAX_SHORT_ID_LENGTH
+from settings import Config, MAX_URL_LENGTH, MAX_SHORT_LENGTH
 
 ORIGINAL_LINK_LABEL = 'Введите ссылку'
 SHORT_LABEL = 'Введите короткий идентификатор'
@@ -17,7 +17,7 @@ UPLOAD_BUTTON_LABEL = 'Загрузить'
 DATA_REQUIRED_MESSAGE = 'Обязательное поле'
 FILE_REQUIRED_MESSAGE = 'Требуется выбрать хотя бы один файл'
 SHORT_ID_ERROR_MESSAGE = 'Можно использовать только буквы и цифры'
-FILE_ALLOWED_MESSAGE = 'Разрешены только изображения'
+FILE_ALLOWED_MESSAGE = 'Разрешены только изображения: jpg, png, jpeg, gif'
 
 
 class URLForm(FlaskForm):
@@ -32,9 +32,9 @@ class URLForm(FlaskForm):
         SHORT_LABEL,
         validators=[
             Optional(),
-            Length(max=MAX_SHORT_ID_LENGTH),
+            Length(max=MAX_SHORT_LENGTH),
             Regexp(
-                Config.SHORT_ID_PATTERN,
+                Config.SHORT_PATTERN,
                 message=SHORT_ID_ERROR_MESSAGE
             )
         ]

@@ -5,7 +5,7 @@ from tests.conftest import PY_URL, TEST_BASE_URL
 from yacut.models import URLMap
 
 CREATE_SHORT_LINK_URL = '/api/id/'
-GET_ORIGINAL_LINK_URL = '/api/id/{short_id}/'
+GET_ORIGINAL_LINK_URL = '/api/id/{short}/'
 VALIDATION_ERROR_KEY = 'message'
 
 
@@ -208,7 +208,7 @@ def test_generated_unique_short_id(json_data, client):
 
 def test_get_url_endpoint(client, short_python_url):
     response = client.get(
-        GET_ORIGINAL_LINK_URL.format(short_id=short_python_url.short)
+        GET_ORIGINAL_LINK_URL.format(short=short_python_url.short)
     )
     assert response.status_code == HTTPStatus.OK, (
         f'GET-запрос к эндпоинту `{GET_ORIGINAL_LINK_URL}` должен вернуть '
@@ -232,7 +232,7 @@ def test_get_url_not_found(client):
         '`short_id` {}.'
     )
     response = client.get(
-        GET_ORIGINAL_LINK_URL.format(short_id='does_not_exist')
+        GET_ORIGINAL_LINK_URL.format(short='does_not_exist')
     )
     assert response.status_code == HTTPStatus.NOT_FOUND, (
         f'GET-запрос к эндпоинту `{GET_ORIGINAL_LINK_URL}` с несуществующим '
