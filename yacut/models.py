@@ -8,7 +8,6 @@ from .error_handlers import (
     ERROR_INVALID_SHORT, ERROR_INVALID_URL, ERROR_SHORT_EXISTS
 )
 from settings import (
-    Config,
     MAX_URL_LENGTH,
     MAX_SHORT_LENGTH,
     MAX_GENERATE_ATTEMPTS,

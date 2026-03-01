@@ -1,6 +1,5 @@
 import asyncio
 from http import HTTPStatus
-from io import BytesIO
 
 import aiohttp
 from werkzeug.datastructures import FileStorage

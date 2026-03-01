@@ -1,9 +1,8 @@
 from flask import flash, redirect, render_template
 
-from settings import Config, SHORT_LINK_VIEW_NAME
+from settings import SHORT_LINK_VIEW_NAME
 
-from . import app, db
-from .error_handlers import ERROR_SHORT_EXISTS
+from . import app
 from .forms import FileForm, URLForm
 from .models import URLMap
 from .yandexdisk import sync_process_uploaded_files
