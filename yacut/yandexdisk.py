@@ -5,7 +5,12 @@ from io import BytesIO
 import aiohttp
 from werkzeug.datastructures import FileStorage
 
-from settings import Config
+from settings import (
+    Config,
+    YANDEX_DISK_DOWNLOAD_URL,
+    YANDEX_DISK_HEADERS,
+    YANDEX_DISK_UPLOAD_URL,
+)
 
 
 ERROR_GET_UPLOAD_LINK = 'Ошибка получения ссылки для загрузки'
@@ -17,7 +22,7 @@ async def _upload_file_and_get_url(session, storage: FileStorage) -> str:
     path_on_disk = f'{Config.YANDEX_DISK_PATH_PREFIX}{storage.filename}'
 
     async with session.get(
-        Config.YANDEX_DISK_UPLOAD_URL,
+        YANDEX_DISK_UPLOAD_URL,
         params={'path': path_on_disk, 'overwrite': 'true'},
     ) as resp:
         if resp.status != HTTPStatus.OK:
@@ -37,7 +42,7 @@ async def _upload_file_and_get_url(session, storage: FileStorage) -> str:
             )
 
     async with session.get(
-        Config.YANDEX_DISK_DOWNLOAD_URL,
+        YANDEX_DISK_DOWNLOAD_URL,
         params={'path': path_on_disk},
     ) as resp:
         if resp.status != HTTPStatus.OK:
@@ -49,7 +54,7 @@ async def _upload_file_and_get_url(session, storage: FileStorage) -> str:
 
 async def process_uploaded_files(file_data):
     async with aiohttp.ClientSession(
-        headers=Config.YANDEX_DISK_HEADERS
+        headers=YANDEX_DISK_HEADERS
     ) as session:
         urls = []
         for item in file_data:

@@ -14,6 +14,7 @@ from settings import (
     MAX_GENERATE_ATTEMPTS,
     SHORT_CHARS,
     SHORT_LENGTH,
+    SHORT_LINK_VIEW_NAME,
     SHORT_PATTERN,
     RESERVED_SHORTS,
 )
@@ -81,7 +82,7 @@ class URLMap(db.Model):
 
     def get_short_link(self):
         return url_for(
-            Config.SHORT_LINK_VIEW_NAME,
+            SHORT_LINK_VIEW_NAME,
             short=self.short,
             _external=True,
         )

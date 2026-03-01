@@ -1,6 +1,6 @@
 from flask import flash, redirect, render_template
 
-from settings import Config
+from settings import Config, SHORT_LINK_VIEW_NAME
 
 from . import app, db
 from .error_handlers import ERROR_SHORT_EXISTS
@@ -31,7 +31,7 @@ def index():
         return render_template("index.html", form=form)
 
 
-@app.route("/<short>", endpoint=Config.SHORT_LINK_VIEW_NAME)
+@app.route("/<short>", endpoint=SHORT_LINK_VIEW_NAME)
 def redirect_view(short):
     return redirect(URLMap.get_or_404(short).original)
 
