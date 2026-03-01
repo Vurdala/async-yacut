@@ -19,15 +19,15 @@ class Config(object):
 
 
 YANDEX_DISK_UPLOAD_URL = (
-        f'{Config.YANDEX_DISK_API_BASE}/disk/resources/upload'
-    )
+    f'{Config.YANDEX_DISK_API_BASE}/disk/resources/upload'
+)
 YANDEX_DISK_DOWNLOAD_PATH = '/disk/resources/download'
 YANDEX_DISK_DOWNLOAD_URL = (
-        f'{Config.YANDEX_DISK_API_BASE}{YANDEX_DISK_DOWNLOAD_PATH}'
-    )
+    f'{Config.YANDEX_DISK_API_BASE}{YANDEX_DISK_DOWNLOAD_PATH}'
+)
 YANDEX_DISK_HEADERS = {
-        'Authorization': f'OAuth {Config.DISK_TOKEN}'
-    }
+    'Authorization': f'OAuth {Config.DISK_TOKEN}'
+}
 SHORT_LINK_VIEW_NAME = 'redirect_view'
 SHORT_LENGTH = 6
 MAX_GENERATE_ATTEMPTS = 10
