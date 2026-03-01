@@ -12,7 +12,9 @@ from settings import (
     MAX_URL_LENGTH,
     MAX_SHORT_LENGTH,
     MAX_GENERATE_ATTEMPTS,
+    SHORT_CHARS,
     SHORT_LENGTH,
+    SHORT_PATTERN,
     RESERVED_SHORTS,
 )
 
@@ -41,25 +43,22 @@ class URLMap(db.Model):
         if not short:
             short = URLMap._generate_unique_short()
 
-        short_invalid = (
-            validate
-            and (
-                len(short) > MAX_SHORT_LENGTH
-                or not Config.SHORT_PATTERN.fullmatch(short)
-            )
-        )
-        if short_invalid:
+        if validate and len(short) > MAX_SHORT_LENGTH:
             raise ValueError(ERROR_INVALID_SHORT)
 
-        url_invalid = validate and len(original) > MAX_URL_LENGTH
-        if url_invalid:
+        if (
+            validate
+            and not SHORT_PATTERN.fullmatch(short)
+        ):
+            raise ValueError(ERROR_INVALID_SHORT)
+
+        if validate and len(original) > MAX_URL_LENGTH:
             raise ValueError(ERROR_INVALID_URL)
 
-        short_reserved_or_exists = (
+        if (
             (validate and short in RESERVED_SHORTS)
             or URLMap.query.filter_by(short=short).first()
-        )
-        if short_reserved_or_exists:
+        ):
             raise ValueError(ERROR_SHORT_EXISTS)
 
         url_map = URLMap(original=original, short=short)
@@ -72,7 +71,7 @@ class URLMap(db.Model):
     def _generate_unique_short():
         for _ in range(MAX_GENERATE_ATTEMPTS):
             short = "".join(
-                random.choices(Config.SHORT_CHARS, k=SHORT_LENGTH)
+                random.choices(SHORT_CHARS, k=SHORT_LENGTH)
             )
             if short not in RESERVED_SHORTS and not URLMap.query.filter_by(
                 short=short

@@ -5,7 +5,7 @@ from wtforms.validators import (
     DataRequired, Length, Optional, Regexp
 )
 
-from settings import Config, MAX_URL_LENGTH, MAX_SHORT_LENGTH
+from settings import Config, MAX_URL_LENGTH, MAX_SHORT_LENGTH, SHORT_PATTERN
 
 ORIGINAL_LINK_LABEL = 'Введите ссылку'
 SHORT_LABEL = 'Введите короткий идентификатор'
@@ -34,7 +34,7 @@ class URLForm(FlaskForm):
             Optional(),
             Length(max=MAX_SHORT_LENGTH),
             Regexp(
-                Config.SHORT_PATTERN,
+                SHORT_PATTERN,
                 message=SHORT_ID_ERROR_MESSAGE
             )
         ]
