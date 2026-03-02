@@ -61,7 +61,6 @@ class URLMap(db.Model):
 
         if URLMap._short_exists(short):
             raise ValueError(ERROR_SHORT_EXISTS)
-        
         url_map = URLMap(
             original=original, short=short or URLMap._generate_unique_short()
         )
