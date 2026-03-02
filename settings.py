@@ -8,9 +8,9 @@ SHORT_PATTERN = re.compile(f'^[{SHORT_CHARS}]*$')
 
 
 class Config(object):
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI", "sqlite:///db.sqlite3")
-    SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
-    DISK_TOKEN = os.getenv("DISK_TOKEN")
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///db.sqlite3')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'your_secret_key')
+    DISK_TOKEN = os.getenv('DISK_TOKEN')
     RESERVED_ENDPOINTS = {'files'}
 
     YANDEX_DISK_API_BASE = 'https://cloud-api.yandex.net/v1'

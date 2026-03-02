@@ -11,14 +11,14 @@ from .yandexdisk import sync_process_uploaded_files
 ERROR_UPLOAD_MESSAGE = 'Ошибка загрузки: {}'
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     form = URLForm()
     if not form.validate_on_submit():
-        return render_template("index.html", form=form)
+        return render_template('index.html', form=form)
     try:
         return render_template(
-            "index.html",
+            'index.html',
             form=form,
             short_link=URLMap.create(
                 original=form.original_link.data,
@@ -28,10 +28,10 @@ def index():
         )
     except (ValueError, RuntimeError) as e:
         flash(str(e))
-        return render_template("index.html", form=form)
+        return render_template('index.html', form=form)
 
 
-@app.route("/<short>", endpoint=SHORT_LINK_VIEW_NAME)
+@app.route('/<short>', endpoint=SHORT_LINK_VIEW_NAME)
 def redirect_view(short):
     return redirect(URLMap.get_or_404(short).original)
 
