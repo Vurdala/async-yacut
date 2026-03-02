@@ -8,7 +8,7 @@ from .models import URLMap
 from .yandexdisk import sync_process_uploaded_files
 
 
-ERROR_UPLOAD_MESSAGE = 'Ошибка загрузки:'
+ERROR_UPLOAD_MESSAGE = 'Ошибка загрузки: {}'
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -23,6 +23,7 @@ def index():
             short_link=URLMap.create(
                 original=form.original_link.data,
                 short=form.custom_id.data,
+                validate=False,
             ).get_short_link(),
         )
     except (ValueError, RuntimeError) as e:
@@ -42,8 +43,8 @@ def files_view():
         return render_template('files.html', form=form)
     try:
         yadisk_urls = sync_process_uploaded_files(form.files.data)
-    except (ValueError, RuntimeError) as e:
-        flash(f'{ERROR_UPLOAD_MESSAGE}{e}')
+    except Exception as e:
+        flash(ERROR_UPLOAD_MESSAGE.format(e))
         return render_template('files.html', form=form)
     try:
         last_index = len(yadisk_urls) - 1
