@@ -78,7 +78,9 @@ class URLMap(db.Model):
             short = ''.join(
                 random.choices(SHORT_CHARS, k=SHORT_LENGTH)
             )
-            if short not in RESERVED_SHORTS and not URLMap._short_exists(short):
+            if short not in RESERVED_SHORTS and (
+                not URLMap._short_exists(short)
+            ):
                 return short
         raise RuntimeError(UNIQUE_SHORT_GENERATION_ERROR)
 
